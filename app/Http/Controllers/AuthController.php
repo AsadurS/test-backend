@@ -16,6 +16,11 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        $this->validate($request, [
+            "email"=>"required|email",
+            'password' => 'required',
+
+        ]);
         $credentials = $request->only('email', 'password');
 
         if ($token = $this->guard()->attempt($credentials)) {
@@ -69,6 +74,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
+            'user' => $this->guard()->user(),
             'expires_in' => $this->guard()->factory()->getTTL() * 60
         ]);
     }
@@ -80,6 +86,31 @@ class AuthController extends Controller
      */
     public function guard()
     {
-        return Auth::guard('api');
+        return Auth::guard();
+    }
+
+    /**
+     * Store a new user.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function register(Request $request)
+    {
+
+        $this->validate($request, [
+            "name"=>["required","string","min:2","max:20"],
+            "email"=>"required|unique:users",
+            'password' => 'min:6|required_with:confirm_password|same:confirm_password',
+
+        ]);
+
+        User::create([
+            "name"=>$request->name,
+            "email"=>$request->email,
+            "password"=>Hash::make($request->password),
+        ]);
+
+        return $this->login($request);
     }
 }
