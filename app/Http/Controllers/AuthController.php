@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -101,7 +103,7 @@ class AuthController extends Controller
         $this->validate($request, [
             "name"=>["required","string","min:2","max:20"],
             "email"=>"required|unique:users",
-            'password' => 'min:6|required_with:confirm_password|same:confirm_password',
+            'password' => 'min:6|required_with:password_confirmation|same:password_confirmation',
 
         ]);
 
